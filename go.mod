@@ -6,7 +6,7 @@ require (
 	honnef.co/go/curve v0.0.0-20240713195357-1e39b7d8d78a
 	honnef.co/go/jello v0.0.0
 	honnef.co/go/libwayland v0.0.0
-	honnef.co/go/wgpu v0.0.0-20240716153913-535527a35c9d
+	honnef.co/go/wgpu v0.0.0-20240719115612-5d243632325b
 )
 
 require (
@@ -23,5 +23,3 @@ require (
 replace honnef.co/go/libwayland => ../libwayland
 
 replace honnef.co/go/jello => ../jello
-
-replace honnef.co/go/wgpu => ../wgpu

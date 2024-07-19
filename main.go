@@ -125,7 +125,7 @@ func main() {
 	defer adapter.Release()
 
 	limits := wgpu.DefaultLimits
-	limits.MaxSampledTexturesPerShaderStage = 4096
+	limits.MaxSampledTexturesPerShaderStage = 8388606
 	dev, err := adapter.RequestDevice(&wgpu.DeviceDescriptor{
 		RequiredFeatures: []wgpu.FeatureName{
 			wgpu.FeatureNameTimestampQuery,
@@ -157,11 +157,6 @@ func main() {
 	r := wgpu_engine.New(dev, &wgpu_engine.RendererOptions{
 		SurfaceFormat: wgpu.TextureFormatRGBA8UnormSrgb,
 		UseCPU:        false,
-		AntialiasingSupport: wgpu_engine.AaSupport{
-			Area:   true,
-			MSAA8:  true,
-			MSAA16: true,
-		},
 	})
 
 	// stroke := curve.DefaultStroke.WithWidth(6)
@@ -254,7 +249,7 @@ func main() {
 		curve.Rect{20, 500, 700, 550}.PathElements(0.1),
 	)
 
-	scene.Append(scene2, curve.Identity)
+	scene.Append(scene2, curve.Rotate(-0.1))
 
 	scene.Fill(
 		gfx.NonZero,
@@ -279,41 +274,82 @@ func main() {
 		curve.Rect{20, 550, 700, 600}.PathElements(0.1),
 	)
 
-	f, err := os.Open("./img.png")
-	if err != nil {
-		panic(err)
+	if true {
+		f, err := os.Open("./img.png")
+		if err != nil {
+			panic(err)
+		}
+		img1, err := png.Decode(f)
+		if err != nil {
+			panic(err)
+		}
+		f.Close()
+
+		f, err = os.Open("./img2.png")
+		if err != nil {
+			panic(err)
+		}
+		img2, err := png.Decode(f)
+		if err != nil {
+			panic(err)
+		}
+		f.Close()
+		// img2 = img2.(*image.NRGBA).SubImage(image.Rect(300, 300, 500, 500))
+
+		f, err = os.Open("./img3.png")
+		if err != nil {
+			panic(err)
+		}
+		img3, err := png.Decode(f)
+		if err != nil {
+			panic(err)
+		}
+		f.Close()
+
+		for i := 0; i < 16*3; i++ {
+			for j := 0; j < 16*3; j++ {
+				scene.Fill(
+					gfx.NonZero,
+					curve.Scale(0.02, 0.02).ThenRotate(0.01*float64(i*j)).ThenTranslate(curve.Vec(float64(i)*20, float64(j)*20)),
+					gfx.ImageBrush{
+						Image: gfx.Image{
+							Image: img1,
+						},
+					},
+					curve.Identity,
+					curve.Rect{0, 0, float64(img1.Bounds().Dx()), float64(img1.Bounds().Dy())}.PathElements(0.1),
+				)
+			}
+		}
+
+		if true {
+			scene.Fill(
+				gfx.NonZero,
+				curve.Scale(0.1, 0.1),
+				gfx.ImageBrush{
+					Image: gfx.Image{
+						Image: img3,
+					},
+				},
+				curve.Identity,
+				curve.Rect{0, 0, float64(img1.Bounds().Dx()), float64(img1.Bounds().Dy())}.PathElements(0.1),
+			)
+
+			var scene3 jello.Scene
+			scene3.Fill(
+				gfx.NonZero,
+				curve.Identity,
+				gfx.ImageBrush{
+					Image: gfx.Image{
+						Image: img2,
+					},
+				},
+				curve.Identity,
+				curve.Rect{0, 0, float64(img2.Bounds().Dx()), float64(img2.Bounds().Dy())}.PathElements(0.1),
+			)
+			scene.Append(&scene3, curve.Identity)
+		}
 	}
-	img, err := png.Decode(f)
-	if err != nil {
-		panic(err)
-	}
-	f.Close()
-
-	// scene.Fill(
-	// 	gfx.NonZero,
-	// 	curve.Scale(0.5, 0.5).ThenTranslate(curve.Vec(400, 400)),
-	// 	gfx.ImageBrush{
-	// 		Image: gfx.Image{
-	// 			Image: img,
-	// 		},
-	// 	},
-	// 	curve.Identity,
-	// 	curve.Rect{0, 0, float64(img.Bounds().Dx()), float64(img.Bounds().Dy())}.PathElements(0.1),
-	// )
-
-	_ = img
-
-	// scene.Fill(
-	// 	gfx.NonZero,
-	// 	curve.Identity,
-	// 	gfx.ImageBrush{
-	// 		Image: gfx.Image{
-	// 			Image: img,
-	// 		},
-	// 	},
-	// 	curve.Identity,
-	// 	curve.Rect{0, 0, float64(img.Bounds().Dx()), float64(img.Bounds().Dy())}.PathElements(0.1),
-	// )
 
 	tex := dev.CreateTexture(&wgpu.TextureDescriptor{
 		Label: "target texture",
