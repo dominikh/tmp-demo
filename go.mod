@@ -1,11 +1,11 @@
 module honnef.co/go/wgpu-demo
 
-go 1.23
+go 1.23rc2
 
 require (
 	honnef.co/go/curve v0.0.0-20240713195357-1e39b7d8d78a
-	honnef.co/go/jello v0.0.0
-	honnef.co/go/libwayland v0.0.0
+	honnef.co/go/jello v0.0.0-20240719120037-6a5bb374e43a
+	honnef.co/go/libwayland v0.0.0-20240729142338-f0b6ac02e03e
 	honnef.co/go/wgpu v0.0.0-20240719115612-5d243632325b
 )
 
@@ -19,7 +19,3 @@ require (
 	honnef.co/go/wgpu-windows-386 v0.1904.1 // indirect
 	honnef.co/go/wgpu-windows-amd64 v0.1904.1 // indirect
 )
-
-replace honnef.co/go/libwayland => ../libwayland
-
-replace honnef.co/go/jello => ../jello

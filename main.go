@@ -1,4 +1,4 @@
-package main ////
+package main
 
 import (
 	"bytes"
@@ -9,7 +9,6 @@ import (
 	"net/http"
 	_ "net/http/pprof"
 	"os"
-	"runtime"
 	"strings"
 	"time"
 
@@ -24,7 +23,7 @@ import (
 )
 
 func main() {
-	runtime.MemProfileRate = 1
+	// runtime.MemProfileRate = 1
 	go func() {
 		http.ListenAndServe("localhost:8080", nil)
 	}()
@@ -159,196 +158,194 @@ func main() {
 		UseCPU:        false,
 	})
 
-	// stroke := curve.DefaultStroke.WithWidth(6)
-
-	type rect struct {
-		r curve.Rect
-		c gfx.Color
-	}
-
-	rects := []rect{
-		{
-			curve.Rect{20, 20, 60, 500},
-			gfx.SRGB{24, 234, 34, 255},
-		},
-		{
-			curve.Rect{70, 20, 110, 500},
-			gfx.SRGB{234, 232, 24, 255},
-		},
-		{
-			curve.Rect{120, 20, 160, 500},
-			gfx.SRGB{24, 234, 200, 255},
-		},
-		{
-			curve.Rect{170, 20, 210, 500},
-			gfx.SRGB{238, 70, 166, 255},
-		},
-
-		{
-			curve.Rect{0, 40, 800, 50},
-			gfx.SRGB{255, 0, 0, 255},
-		},
-		{
-			curve.Rect{0, 50, 800, 60},
-			gfx.SRGB{255, 0, 0, 128},
-		},
-		{
-			curve.Rect{0, 100, 800, 110},
-			gfx.SRGB{0, 127, 255, 255},
-		},
-		{
-			curve.Rect{0, 110, 800, 120},
-			gfx.SRGB{0, 127, 255, 128},
-		},
-		{
-			curve.Rect{0, 160, 800, 170},
-			gfx.SRGB{147, 255, 0, 255},
-		},
-		{
-			curve.Rect{0, 170, 800, 180},
-			gfx.SRGB{147, 255, 0, 128},
-		},
-	}
-
 	scene := &jello.Scene{}
 
-	for _, r := range rects {
+	{
+		type rect struct {
+			r curve.Rect
+			c gfx.Color
+		}
+
+		// Horizontal and vertical stripes, demonstrating gamma-corrected alpha
+		// blending.
+		rects := []rect{
+			{
+				curve.Rect{20, 20, 60, 500},
+				gfx.SRGB{24, 234, 34, 255},
+			},
+			{
+				curve.Rect{70, 20, 110, 500},
+				gfx.SRGB{234, 232, 24, 255},
+			},
+			{
+				curve.Rect{120, 20, 160, 500},
+				gfx.SRGB{24, 234, 200, 255},
+			},
+			{
+				curve.Rect{170, 20, 210, 500},
+				gfx.SRGB{238, 70, 166, 255},
+			},
+
+			{
+				curve.Rect{0, 40, 800, 50},
+				gfx.SRGB{255, 0, 0, 255},
+			},
+			{
+				curve.Rect{0, 50, 800, 60},
+				gfx.SRGB{255, 0, 0, 128},
+			},
+			{
+				curve.Rect{0, 100, 800, 110},
+				gfx.SRGB{0, 127, 255, 255},
+			},
+			{
+				curve.Rect{0, 110, 800, 120},
+				gfx.SRGB{0, 127, 255, 128},
+			},
+			{
+				curve.Rect{0, 160, 800, 170},
+				gfx.SRGB{147, 255, 0, 255},
+			},
+			{
+				curve.Rect{0, 170, 800, 180},
+				gfx.SRGB{147, 255, 0, 128},
+			},
+		}
+		for _, r := range rects {
+			scene.Fill(
+				gfx.NonZero,
+				curve.Identity,
+				gfx.SolidBrush{
+					Color: r.c,
+				},
+				curve.Identity,
+				r.r.PathElements(0.1),
+			)
+		}
+	}
+
+	{
+		// Slightly askew color gradient in sRGB, gamma-corrected, also
+		// demonstrating concatenating scenes.
+		subscene := &jello.Scene{}
+		subscene.Fill(
+			gfx.NonZero,
+			curve.Identity,
+			gfx.GradientBrush{
+				Gradient: gfx.LinearGradient{
+					Start: curve.Pt(20, 0),
+					End:   curve.Pt(700, 0),
+					Stops: []gfx.ColorStop{
+						{
+							Offset: 0,
+							Color:  gfx.LinearSRGB{1, 1, 0, 1},
+						},
+						{
+							Offset: 1,
+							Color:  gfx.LinearSRGB{0, 1, 0, 1},
+						},
+					},
+				},
+			},
+			curve.Identity,
+			curve.Rect{20, 500, 700, 550}.PathElements(0.1),
+		)
+		scene.Append(subscene, curve.Rotate(-0.1))
+	}
+
+	{
+		// Color gradient in Oklch.
 		scene.Fill(
 			gfx.NonZero,
 			curve.Identity,
-			gfx.SolidBrush{
-				Color: r.c,
+			gfx.GradientBrush{
+				Gradient: gfx.LinearGradient{
+					Start: curve.Pt(20, 0),
+					End:   curve.Pt(700, 0),
+					Stops: []gfx.ColorStop{
+						{
+							Offset: 0,
+							Color:  gfx.Oklch{0.628, 0.25768330773615683, 29.2338851923426, 1},
+						},
+						{
+							Offset: 1,
+							Color:  gfx.Oklch{0.8664396115356693, 0.2948272403370167, 142.49533888780996, 1},
+						},
+					},
+				},
 			},
 			curve.Identity,
-			r.r.PathElements(0.1),
+			curve.Rect{20, 550, 700, 600}.PathElements(0.1),
 		)
 	}
 
-	scene2 := &jello.Scene{}
-
-	scene2.Fill(
-		gfx.NonZero,
-		curve.Identity,
-		gfx.GradientBrush{
-			Gradient: gfx.LinearGradient{
-				Start: curve.Pt(20, 0),
-				End:   curve.Pt(700, 0),
-				Stops: []gfx.ColorStop{
-					{
-						Offset: 0,
-						Color:  gfx.LinearSRGB{1, 1, 0, 1},
-					},
-					{
-						Offset: 1,
-						Color:  gfx.LinearSRGB{0, 1, 0, 1},
-					},
-				},
-			},
-		},
-		curve.Identity,
-		curve.Rect{20, 500, 700, 550}.PathElements(0.1),
-	)
-
-	scene.Append(scene2, curve.Rotate(-0.1))
-
-	scene.Fill(
-		gfx.NonZero,
-		curve.Identity,
-		gfx.GradientBrush{
-			Gradient: gfx.LinearGradient{
-				Start: curve.Pt(20, 0),
-				End:   curve.Pt(700, 0),
-				Stops: []gfx.ColorStop{
-					{
-						Offset: 0,
-						Color:  gfx.Oklch{0.628, 0.25768330773615683, 29.2338851923426, 1},
-					},
-					{
-						Offset: 1,
-						Color:  gfx.Oklch{0.8664396115356693, 0.2948272403370167, 142.49533888780996, 1},
-					},
-				},
-			},
-		},
-		curve.Identity,
-		curve.Rect{20, 550, 700, 600}.PathElements(0.1),
-	)
-
-	if true {
+	{
+		// 8x8 grid of mes, rotated about _some_ point
 		f, err := os.Open("./img.png")
 		if err != nil {
 			panic(err)
 		}
-		img1, err := png.Decode(f)
+		img, err := png.Decode(f)
 		if err != nil {
 			panic(err)
 		}
 		f.Close()
-
-		f, err = os.Open("./img2.png")
-		if err != nil {
-			panic(err)
-		}
-		img2, err := png.Decode(f)
-		if err != nil {
-			panic(err)
-		}
-		f.Close()
-		// img2 = img2.(*image.NRGBA).SubImage(image.Rect(300, 300, 500, 500))
-
-		f, err = os.Open("./img3.png")
-		if err != nil {
-			panic(err)
-		}
-		img3, err := png.Decode(f)
-		if err != nil {
-			panic(err)
-		}
-		f.Close()
-
-		for i := 0; i < 16*3; i++ {
-			for j := 0; j < 16*3; j++ {
+		for i := 0; i < 8; i++ {
+			for j := 0; j < 8; j++ {
 				scene.Fill(
 					gfx.NonZero,
-					curve.Scale(0.02, 0.02).ThenRotate(0.01*float64(i*j)).ThenTranslate(curve.Vec(float64(i)*20, float64(j)*20)),
+					curve.Scale(0.02, 0.02).ThenRotateAbout(0.1*float64(i*j), curve.Pt(5, 5)).ThenTranslate(curve.Vec(float64(i)*20+620, float64(j)*20+620)),
 					gfx.ImageBrush{
 						Image: gfx.Image{
-							Image: img1,
+							Image: img,
 						},
 					},
 					curve.Identity,
-					curve.Rect{0, 0, float64(img1.Bounds().Dx()), float64(img1.Bounds().Dy())}.PathElements(0.1),
+					curve.Rect{0, 0, float64(img.Bounds().Dx()), float64(img.Bounds().Dy())}.PathElements(0.1),
 				)
 			}
 		}
+	}
 
-		if true {
-			scene.Fill(
-				gfx.NonZero,
-				curve.Scale(0.1, 0.1),
-				gfx.ImageBrush{
-					Image: gfx.Image{
-						Image: img3,
-					},
-				},
-				curve.Identity,
-				curve.Rect{0, 0, float64(img1.Bounds().Dx()), float64(img1.Bounds().Dy())}.PathElements(0.1),
-			)
-
-			var scene3 jello.Scene
-			scene3.Fill(
-				gfx.NonZero,
-				curve.Identity,
-				gfx.ImageBrush{
-					Image: gfx.Image{
-						Image: img2,
-					},
-				},
-				curve.Identity,
-				curve.Rect{0, 0, float64(img2.Bounds().Dx()), float64(img2.Bounds().Dy())}.PathElements(0.1),
-			)
-			scene.Append(&scene3, curve.Identity)
+	{
+		// Another me, clipped by a circle, translucent.
+		f, err := os.Open("./img2.png")
+		if err != nil {
+			panic(err)
 		}
+		img, err := png.Decode(f)
+		if err != nil {
+			panic(err)
+		}
+		f.Close()
+		var subscene jello.Scene
+		subscene.Fill(
+			gfx.NonZero,
+			curve.Identity,
+			gfx.ImageBrush{
+				Image: gfx.Image{
+					Image: img,
+				},
+			},
+			curve.Identity,
+			curve.Rect{0, 0, float64(img.Bounds().Dx()), float64(img.Bounds().Dy())}.PathElements(0.1),
+		)
+		scene.PushLayer(gfx.BlendMode{}, 0.9, curve.Identity, curve.Circle{Center: curve.Pt(400, 300), Radius: 100}.PathElements(0.1))
+		scene.Append(&subscene, curve.Identity)
+		scene.PopLayer()
+	}
+
+	{
+		// f(x) = (x⁴ + x³ - 13x² - x) / 10
+		p := curve.FitToBezPathOpt(Quartic{}, 0.00005)
+		scene.Stroke(
+			curve.DefaultStroke.
+				WithCaps(curve.RoundCap).WithWidth(1),
+			curve.Scale(10, 10).ThenTranslate(curve.Vec(400, 700)),
+			gfx.SolidBrush{Color: gfx.LinearSRGB{1, 0, 0, 1}},
+			curve.Identity,
+			p.Elements(),
+		)
 	}
 
 	tex := dev.CreateTexture(&wgpu.TextureDescriptor{
@@ -368,18 +365,15 @@ func main() {
 	view := tex.CreateView(nil)
 	defer view.Release()
 
-	var deg int
 	var frame uint64
 
-	const debug = false
+	const debug = true
 	var prof *wgpu_engine.Profiler
 	if debug {
 		prof = wgpu_engine.NewProfiler(dev)
 	}
 
-	var report wgpu.GlobalReport
 	arena := mem.NewArena()
-
 	vararg := make([]*wgpu.CommandBuffer, 1)
 	for {
 		// if frame == 32000 {
@@ -401,19 +395,9 @@ func main() {
 			}
 		}
 
-		if debug && false {
-			// OPT(dh): reuse buffer
-			var buf bytes.Buffer
-			ins.Report(&report)
-			printReport(&buf, &report)
-			fmt.Fprintln(&buf)
-			fmt.Println(buf.String())
-		}
-
 		pgroup := prof.Start(frame)
 		frame++
 
-		deg = (deg + 1) % 360
 		span := pgroup.Nest("wayland dispatch")
 		dsp.Dispatch()
 		span.End()
@@ -457,47 +441,6 @@ func main() {
 	}
 }
 
-func printReport(w io.Writer, report *wgpu.GlobalReport) {
-	printRegistryReport(w, &report.Surfaces, "surfaces.")
-
-	switch report.BackendType {
-	case wgpu.BackendTypeD3D12:
-		printHubReport(w, &report.DX12, "\tdx12.")
-	case wgpu.BackendTypeMetal:
-		printHubReport(w, &report.Metal, "\tmetal.")
-	case wgpu.BackendTypeVulkan:
-		printHubReport(w, &report.Vulkan, "\tvulkan.")
-	case wgpu.BackendTypeOpenGL:
-		printHubReport(w, &report.GL, "\tgl.")
-	}
-}
-
-func printRegistryReport(w io.Writer, report *wgpu.RegistryReport, prefix string) {
-	fmt.Fprintf(w, "%snumAllocated=%d\n", prefix, report.NumAllocated)
-	fmt.Fprintf(w, "%snumKeptFromUser=%d\n", prefix, report.NumKeptFromUser)
-	fmt.Fprintf(w, "%snumReleasedFromUser=%d\n", prefix, report.NumReleasedFromUser)
-	fmt.Fprintf(w, "%snumError=%d\n", prefix, report.NumError)
-	fmt.Fprintf(w, "%selementSize=%d\n", prefix, report.ElementSize)
-}
-
-func printHubReport(w io.Writer, report *wgpu.HubReport, prefix string) {
-	printRegistryReport(w, &report.Adapters, prefix+"adapter.")
-	printRegistryReport(w, &report.Devices, prefix+"devices.")
-	printRegistryReport(w, &report.Queues, prefix+"queues.")
-	printRegistryReport(w, &report.PipelineLayouts, prefix+"pipelineLayouts.")
-	printRegistryReport(w, &report.ShaderModules, prefix+"shaderModules.")
-	printRegistryReport(w, &report.BindGroupLayouts, prefix+"bindGroupLayouts.")
-	printRegistryReport(w, &report.BindGroups, prefix+"bindGroups.")
-	printRegistryReport(w, &report.CommandBuffers, prefix+"commandBuffers.")
-	printRegistryReport(w, &report.RenderBundles, prefix+"renderBundles.")
-	printRegistryReport(w, &report.RenderPipelines, prefix+"renderPipelines.")
-	printRegistryReport(w, &report.ComputePipelines, prefix+"computePipelines.")
-	printRegistryReport(w, &report.QuerySets, prefix+"querySets.")
-	printRegistryReport(w, &report.Textures, prefix+"textures.")
-	printRegistryReport(w, &report.TextureViews, prefix+"textureViews.")
-	printRegistryReport(w, &report.Samplers, prefix+"samplers.")
-}
-
 func printProfilerResult(w io.Writer, res *wgpu_engine.ProfilerResult, depth int) {
 	nesting := strings.Repeat("  ", depth+1)
 	qnesting := strings.Repeat("  ", depth+2)
@@ -523,4 +466,43 @@ func printProfilerResult(w io.Writer, res *wgpu_engine.ProfilerResult, depth int
 
 func formatDuration(d time.Duration) string {
 	return fmt.Sprintf("%.3f µs", float64(d.Nanoseconds())/1000)
+}
+
+type Quartic struct{}
+
+var _ curve.FittableCurve = Quartic{}
+
+// eval evaluates f(x) = (x⁴ + x³ - 13x² - x) / 10
+func eval(x float64) float64 {
+	return (x*x*x*x + x*x*x - 13*x*x - x) / 10
+}
+
+// evalDeriv evaluates the derivative of [eval], f'(x) = (4x³ + 3x² - 26x - 1) / 10
+func evalDeriv(x float64) float64 {
+	return (4*x*x*x + 3*x*x - 26*x - 1) / 10
+}
+
+// BreakCusp implements curve.ParamCurveFit.
+func (q Quartic) BreakCusp(start float64, end float64) (float64, bool) {
+	return 0, false
+}
+
+// SamplePtDeriv implements curve.ParamCurveFit.
+func (q Quartic) SamplePtDeriv(t float64) (curve.Point, curve.Vec2) {
+	// t ∈ [0, 1] but we want to plot our function from x=-4.5 to x=3.5
+	x := (1-t)*-4.5 + t*3.5
+	// We negate y and dy because our coordinate system is y-down
+	y := -eval(x)
+	dx := 1.0
+	dy := -evalDeriv(x)
+	return curve.Pt(x, y), curve.Vec(dx, dy)
+}
+
+// SamplePtTangent implements curve.ParamCurveFit.
+func (q Quartic) SamplePtTangent(t float64, sign float64) curve.CurveFitSample {
+	p, tangent := q.SamplePtDeriv(t)
+	return curve.CurveFitSample{
+		Point:   p,
+		Tangent: tangent,
+	}
 }
